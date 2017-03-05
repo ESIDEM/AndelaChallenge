@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Andela Challenge</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_user_details">UserDetails</string>
+    <string name="user_name">Sam Esidem</string>
+    <string name="user_url">http://github.com/esidem</string>
+    <string name="user_name_full">Name: %s</string>
+    <string name="user_url_full">URL: %s</string>
+</resources>
