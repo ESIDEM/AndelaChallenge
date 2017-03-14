@@ -43,6 +43,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public void onBindViewHolder(UserViewHolder holder, int position) {
         Picasso.with(context).load(userList.get(position).getAvatarUrl()).into(holder.avatarImageView);
         holder.usernameTextView.setText(userList.get(position).getLogin());
+        holder.locationView.setVisibility(View.VISIBLE);
 
     }
 
@@ -55,6 +56,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         ImageView avatarImageView;
         TextView usernameTextView;
+        TextView locationView;
 
 
         public UserViewHolder(View itemView) {
@@ -62,6 +64,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             itemView.setOnClickListener(this);
             avatarImageView = (ImageView) itemView.findViewById(R.id.imageview_avatar);
             usernameTextView = (TextView) itemView.findViewById(R.id.textview_username);
+            locationView = (TextView) itemView.findViewById(R.id.location_view);
+
 
         }
 

@@ -17,4 +17,14 @@
         android:id="@+id/recyclerview_user_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <TextView
+        android:id="@+id/empty_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/network_check"
+        android:textSize="@dimen/titleText_size"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:clickable="true"/>
+
 </RelativeLayout>

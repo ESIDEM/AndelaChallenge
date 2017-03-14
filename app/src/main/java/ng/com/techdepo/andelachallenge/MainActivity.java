@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import ng.com.techdepo.andelachallenge.adapter.UserAdapter;
@@ -18,14 +19,22 @@ import ng.com.techdepo.andelachallenge.adapter.UserDivider;
 import ng.com.techdepo.andelachallenge.model.UserList;
 import ng.com.techdepo.andelachallenge.service.RestApiBuilder;
 import ng.com.techdepo.andelachallenge.service.RestApiService;
+import ng.com.techdepo.andelachallenge.utility.ConnectionTest;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static ng.com.techdepo.andelachallenge.R.id.location_view;
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private ProgressDialog mProgress;
+    private TextView emptyTextView;
+
+    boolean isConnected;
 
 
     @Override
@@ -36,11 +45,14 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         mProgress = new ProgressDialog(this);
-        mProgress.setMessage("Please Wait..." );
-        mProgress.show();
+
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_user_list);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        emptyTextView=(TextView)findViewById(R.id.empty_text_view);
+
+
+        isConnected = ConnectionTest.isNetworkAvailable(this);
 
         fetchUsers();
 
@@ -48,38 +60,57 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchUsers() {
-        String searchParams = "language:java location:lagos";
-        RestApiService apiService = new RestApiBuilder().getService();
-        Call<UserList> userListCall = apiService.getUserList(searchParams);
-        userListCall.enqueue(new Callback<UserList>() {
-            @Override
-            public void onResponse(Call<UserList> call, Response<UserList> response) {
-                if (response.isSuccessful()) {
-                    UserList userList = response.body();
-                    setAdapterData(userList);
-                    mProgress.dismiss();
-                } else {
+
+        if (isConnected) {
+            mProgress.setMessage(getString(R.string.progress_text) );
+            mProgress.show();
+            String searchParams = "language:java location:lagos";
+            RestApiService apiService = new RestApiBuilder().getService();
+            Call<UserList> userListCall = apiService.getUserList(searchParams);
+            userListCall.enqueue(new Callback<UserList>() {
+                @Override
+                public void onResponse(Call<UserList> call, Response<UserList> response) {
+                    if (response.isSuccessful()) {
+                        UserList userList = response.body();
+                        setAdapterData(userList);
+                        mProgress.dismiss();
+                    } else {
+                        mProgress.dismiss();
+                        Toast.makeText(MainActivity.this,
+                                getString(R.string.bad_request),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<UserList> call, Throwable t) {
                     mProgress.dismiss();
                     Toast.makeText(MainActivity.this,
-                            "Bad request",
+                            getString(R.string.request_fail),
                             Toast.LENGTH_SHORT).show();
                 }
-            }
+            });
+        }else {
 
-            @Override
-            public void onFailure(Call<UserList> call, Throwable t) {
-                mProgress.dismiss();
-                Toast.makeText(MainActivity.this,
-                        "Request failed. Check your internet connection",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
+            Toast.makeText(this,getString(R.string.offline_text),Toast.LENGTH_LONG).show();
+
+            return;
+        }
     }
 
     private void setAdapterData(UserList userList) {
         UserAdapter adapter = new UserAdapter(userList.getItems());
         mRecyclerView.addItemDecoration(new UserDivider());
         mRecyclerView.setAdapter(adapter);
+        if(adapter.getItemCount()==0) {
+
+            emptyTextView.setVisibility(VISIBLE);
+
+        }else{
+
+            emptyTextView.setVisibility(GONE);
+
+        }
     }
 
     @Override
@@ -97,7 +128,9 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
+
+            fetchUsers();
             return true;
         }
 
